@@ -25,6 +25,7 @@ use App\Http\Controllers\seguridad\PermissionTypeController;
 use App\Http\Controllers\seguridad\RoleController;
 use App\Http\Controllers\seguridad\UserController;
 use App\Http\Controllers\SolicitudController;
+use App\Http\Controllers\SolicitudItemController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,5 +46,14 @@ Route::middleware(['auth'])->group(function () {
     Route::put('seguridad/user/sync_rol/{user_id}/{rol_id}', [UserController::class, 'sync_rol']);
     Route::resource('seguridad/user', UserController::class);
 
-    Route::resource('solicitudes', SolicitudController::class);
+    Route::resource('solicitudes', SolicitudController::class)
+        ->parameters([
+            'solicitudes' => 'solicitud'
+        ]);
+    Route::resource(
+        'solicitud-items',
+        SolicitudItemController::class
+    )->parameters([
+        'solicitud-items' => 'solicitud_item'
+    ]);
 });

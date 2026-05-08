@@ -107,17 +107,6 @@
                         </div>
                     @endif
 
-                    @if (session('success'))
-                        <script>
-                            toastr.success("{{ session('success') }}");
-                        </script>
-                    @endif
-
-                    @if (session('error'))
-                        <script>
-                            toastr.error("{{ session('error') }}");
-                        </script>
-                    @endif
 
                     <div class="table-responsive">
                         <table id="datatable-basic" class="table table-striped text-nowrap w-100">
@@ -140,19 +129,30 @@
                                         <td>{{ $item->fecha->format('d/m/Y') }}</td>
                                         <td class="text-end"> ${{ number_format($item->total_estimado, 2) }}</td>
                                         <td>
+                                            <!-- Ver / Gestionar -->
+                                            <a href="{{ route('solicitudes.show', $item) }}"
+                                                class="btn btn-sm btn-primary btn-wave">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            <!-- Editar -->
+                                            <button type="button" class="btn btn-info btn-sm"
+                                                onclick="openSolicitudEditDrawer(
+                                                    '{{ $item->id }}',
+                                                    '{{ $item->codigo }}',
+                                                    '{{ $item->fecha->format('Y-m-d') }}',
+                                                    `{{ $item->nombre_proceso }}`
+                                                )">
+                                                <i class="ri-edit-line"></i>
 
-                                            <button class="btn btn-sm btn-info btn-wave" data-bs-toggle="modal"
-                                                data-bs-target="#modal-edit-{{ $item->id }}">
-                                                &nbsp;<i class="ri-edit-line"></i>&nbsp;</button>
-                                            &nbsp;
+                                            </button>
+                                            <!-- Eliminar -->
                                             <button class="btn btn-sm btn-danger btn-wave" data-bs-toggle="modal"
                                                 data-bs-target="#modal-delete-{{ $item->id }}">
-                                                &nbsp;<i class="bi bi-trash-fill"></i>&nbsp;</button>
-
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
                                         </td>
                                     </tr>
-                                    {{--  @include('catalogo.clase.edit')
-                                    @include('catalogo.clase.delete') --}}
+                                    @include('solicitudes.delete')
                                 @endforeach
 
                             </tbody>
@@ -174,85 +174,116 @@
     <div id="solicitud-create-drawer" class="drawer" aria-hidden="true">
 
         <div class="drawer-content">
-
             <!-- Header -->
             <div class="drawer-header">
-
                 <h5 class="drawer-title">
                     Nueva Solicitud OBS
                 </h5>
-
                 <button type="button" class="drawer-close" data-drawer-close="solicitud-create-drawer">
-
                     &times;
-
                 </button>
-
             </div>
 
             <!-- Body -->
             <div class="drawer-body">
-
                 <form action="{{ route('solicitudes.store') }}" method="POST">
-
                     @csrf
-
                     <div class="mb-3">
                         <label class="form-label">
                             Código OBS
                         </label>
-
                         <input type="text" name="codigo" class="form-control" required>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">
                             Fecha
                         </label>
-
                         <input type="date" name="fecha" class="form-control" required>
                     </div>
-
-                    <div class="mb-3">
+                    {{-- <div class="mb-3">
                         <label class="form-label">
                             Total Estimado
                         </label>
-
                         <input type="number" step="0.01" name="total_estimado" class="form-control" value="0.00">
-                    </div>
-
+                    </div> --}}
                     <div class="mb-3">
                         <label class="form-label">
                             Nombre del Proceso
                         </label>
-
                         <textarea name="nombre_proceso" class="form-control" rows="3" required></textarea>
                     </div>
-
                     <div class="d-flex justify-content-end gap-2">
-
                         <button type="button" class="btn btn-light" data-drawer-close="solicitud-create-drawer">
-
                             Cancelar
-
                         </button>
-
-                        <button type="submit" class="btn btn-primary">
-
+                        <!-- Guardar y volver -->
+                        <button type="submit" name="accion" value="guardar" class="btn btn-secondary">
                             Guardar
-
                         </button>
-
+                        <!-- Guardar y gestionar -->
+                        <button type="submit" name="accion" value="continuar" class="btn btn-primary">
+                            <i class="bi bi-arrow-right-circle me-1"></i>
+                            Guardar y Continuar
+                        </button>
                     </div>
-
                 </form>
-
             </div>
-
         </div>
-
     </div>
 
+    <!-- Overlay -->
+    <div class="drawer-overlay" id="edit-solicitud-overlay" data-drawer-close="edit-solicitud-drawer">
+    </div>
+    <!-- Drawer -->
+    <div id="edit-solicitud-drawer" class="drawer">
+        <div class="drawer-content">
+            <!-- Header -->
+            <div class="drawer-header">
+                <h5 class="drawer-title">
+                    Editar Solicitud
+                </h5>
+                <button type="button" class="drawer-close" data-drawer-close="edit-solicitud-drawer">
+                    &times;
+                </button>
+            </div>
+            <!-- Body -->
+            <div class="drawer-body">
+                <form id="edit-solicitud-form" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <!-- Código -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Código OBS
+                        </label>
+                        <input type="text" id="edit_codigo" name="codigo" class="form-control" required>
+                    </div>
+                    <!-- Fecha -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Fecha
+                        </label>
+                        <input type="date" id="edit_fecha" name="fecha" class="form-control" required>
+                    </div>
+                    <!-- Nombre -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Nombre del Proceso
+                        </label>
+                        <textarea id="edit_nombre_proceso" name="nombre_proceso" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light" data-drawer-close="edit-solicitud-drawer">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Actualizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script src="{{ asset('assets/libs/dataTables/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/libs/dataTables/dataTables.bootstrap5.min.js') }}"></script>
@@ -299,66 +330,45 @@
     </script>
     <script>
         (function(w) {
-
             'use strict';
-
             var DRAWER_ID = 'solicitud-create-drawer';
             var OVERLAY_ID = 'solicitud-create-overlay';
-
             function el() {
                 return document.getElementById(DRAWER_ID);
             }
-
             function overlay() {
                 return document.getElementById(OVERLAY_ID);
             }
-
             function open() {
-
                 var node = el();
                 var ov = overlay();
-
                 if (!node) return;
-
                 node.classList.add('is-open');
-
                 if (ov) {
                     ov.classList.add('is-open');
                 }
-
                 node.setAttribute('aria-hidden', 'false');
-
                 document.body.classList.add('drawer-open-body');
             }
 
             function close() {
-
                 var node = el();
                 var ov = overlay();
-
                 if (!node) return;
-
                 node.classList.remove('is-open');
-
                 if (ov) {
                     ov.classList.remove('is-open');
                 }
-
                 node.setAttribute('aria-hidden', 'true');
-
                 document.body.classList.remove('drawer-open-body');
             }
 
             document.addEventListener('click', function(e) {
-
                 var t = e.target.closest(
                     '[data-drawer-close="' + DRAWER_ID + '"]'
                 );
-
                 if (t) {
-
                     e.preventDefault();
-
                     close();
                 }
             });
@@ -368,5 +378,82 @@
 
         })(window);
     </script>
+    <script>
+        function openSolicitudEditDrawer(
+            id,
+            codigo,
+            fecha,
+            nombre
+        ) {
+            /*
+            |--------------------------------------------------------------------------
+            | ACTION FORM
+            |--------------------------------------------------------------------------
+            */
+            document.getElementById(
+                'edit-solicitud-form'
+            ).action = '/solicitudes/' + id;
+            /*
+            |--------------------------------------------------------------------------
+            | SET VALUES
+            |--------------------------------------------------------------------------
+            */
+            document.getElementById(
+                'edit_codigo'
+            ).value = codigo;
+            document.getElementById(
+                'edit_fecha'
+            ).value = fecha;
+            document.getElementById(
+                'edit_nombre_proceso'
+            ).value = nombre;
+            /*
+            |--------------------------------------------------------------------------
+            | OPEN DRAWER
+            |--------------------------------------------------------------------------
+            */
+            document.getElementById(
+                'edit-solicitud-drawer'
+            ).classList.add('is-open');
+            document.getElementById(
+                'edit-solicitud-overlay'
+            ).classList.add('is-open');
+
+            document.body.classList.add(
+                'drawer-open-body'
+            );
+        }
+        /*
+        |--------------------------------------------------------------------------
+        | CLOSE DRAWER
+        |--------------------------------------------------------------------------
+        */
+        function closeSolicitudEditDrawer() {
+            document.getElementById(
+                'edit-solicitud-drawer'
+            ).classList.remove('is-open');
+            document.getElementById(
+                'edit-solicitud-overlay'
+            ).classList.remove('is-open');
+            document.body.classList.remove(
+                'drawer-open-body'
+            );
+        }
+        /*
+        |--------------------------------------------------------------------------
+        | EVENTS
+        |--------------------------------------------------------------------------
+        */
+        document.addEventListener('click', function(e) {
+            var t = e.target.closest(
+                '[data-drawer-close="edit-solicitud-drawer"]'
+            );
+            if (t) {
+                e.preventDefault();
+                closeSolicitudEditDrawer();
+            }
+        });
+    </script>
+    
     <!-- End:: row-1 -->
 @endsection

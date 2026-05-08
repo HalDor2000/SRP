@@ -16,5 +16,19 @@ class Solicitud extends Model
     ];
     protected $casts = [
         'fecha' => 'date',
+        'total_estimado' => 'decimal:2',
     ];
+
+    public function items()
+    {
+        return $this->hasMany(SolicitudItem::class);
+    }
+
+    public function recalcularTotal()
+    {
+        $this->total_estimado =
+            $this->items()->sum('costo_total');
+
+        $this->save();
+    }
 }

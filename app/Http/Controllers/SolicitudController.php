@@ -30,28 +30,49 @@ class SolicitudController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        //
-        {
-            Solicitud::create([
+    { {
+            $solicitud = Solicitud::create([
                 'codigo' => $request->codigo,
                 'nombre_proceso' => $request->nombre_proceso,
                 'fecha' => $request->fecha,
-                'total_estimado' => $request->total_estimado,
+                'total_estimado' => 0,
             ]);
-
+            if ($request->accion === 'continuar') {
+                return redirect()
+                    ->route(
+                        'solicitudes.show',
+                        $solicitud
+                    )
+                    ->with(
+                        'success',
+                        'Solicitud creada correctamente'
+                    );
+            }
             return redirect()
                 ->route('solicitudes.index')
-                ->with('success', 'Solicitud creada correctamente');
+                ->with(
+                    'success',
+                    'Solicitud creada correctamente'
+                );
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Solicitud $solicitud)
     {
-        //
+        /*
+        | CARGAR RELACIONES
+        */
+        $solicitud->load('items');
+        /*
+        | VIEW
+        */
+        return view(
+            'solicitudes.show',
+            compact('solicitud')
+        );
     }
 
     /**
@@ -65,16 +86,32 @@ class SolicitudController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
+    public function update(
+        Request $request,
+        Solicitud $solicitud
+    ) {
+        $solicitud->update([
+            'codigo' => $request->codigo,
+            'fecha' => $request->fecha,
+            'nombre_proceso' =>
+            $request->nombre_proceso,
+        ]);
+        return back()->with(
+            'success',
+            'Solicitud actualizada correctamente'
+        );
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Solicitud $solicitud)
     {
         //
+        $solicitud->delete();
+
+        return redirect()
+            ->route('solicitudes.index')
+            ->with('success', 'Solicitud eliminada correctamente');
     }
 }
