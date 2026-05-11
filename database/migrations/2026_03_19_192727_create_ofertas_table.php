@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('solicitud_id')->constrained('solicitudes')->cascadeOnDelete();
-            $table->foreignId('proveedor_id')->constrained('proveedores')->cascadeOnDelete();
+            $table->foreignId('proveedor_id')
+                ->constrained('proveedores')
+                ->restrictOnDelete();
 
             $table->date('fecha_oferta')->nullable();
 
