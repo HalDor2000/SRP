@@ -39,4 +39,18 @@ class SolicitudItem extends Model
     {
         return $this->belongsTo(Solicitud::class);
     }
+
+    public function ofertaDetalles()
+    {
+        return $this->hasMany(
+            OfertaDetalle::class
+        );
+    }
+
+    public function razonabilidadDetalles()
+    {
+        return $this->hasMany(
+            RazonabilidadDetalle::class
+        );
+    }
 }

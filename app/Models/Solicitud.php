@@ -28,7 +28,26 @@ class Solicitud extends Model
     {
         $this->total_estimado =
             $this->items()->sum('costo_total');
-
         $this->save();
+    }
+
+    public function ofertas()
+    {
+        return $this->hasMany(
+            Oferta::class
+        );
+    }
+
+    public function evaluacion()
+    {
+        return $this->hasOne(
+            Evaluacion::class
+        );
+    }
+    public function razonabilidad()
+    {
+        return $this->hasOne(
+            Razonabilidad::class
+        );
     }
 }

@@ -65,7 +65,11 @@ class SolicitudController extends Controller
         /*
         | CARGAR RELACIONES
         */
-        $solicitud->load('items');
+        $solicitud->load([
+            'items',
+            'ofertas.proveedor',
+            'ofertas.detalles',
+        ]);
         /*
         | VIEW
         */

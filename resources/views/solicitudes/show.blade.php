@@ -102,7 +102,8 @@
                             <div class="col-md-3">
                                 <label>Fecha de inicio de proceso</label>
 
-                                <input class="form-control bg-light" value="{{ $solicitud->fecha->format('d/m/Y') }}" readonly>
+                                <input class="form-control bg-light" value="{{ $solicitud->fecha->format('d/m/Y') }}"
+                                    readonly>
                             </div>
                         </div>
                     </div>
@@ -194,6 +195,11 @@
                                         <i class="bi bi-trash-fill"></i>
                                     </button>
                                 </form>
+                                <a href="{{ route('evaluaciones.show', $solicitud) }}"
+                                    class="btn btn-success btn-sm">
+                                    <i class="bx bx-spreadsheet me-1"></i>
+                                    Evaluar Ofertas
+                                </a>
                             </td>
                         </tr>
                     @empty
@@ -215,6 +221,97 @@
             </h6>
         </div>
     </div>
+
+    <!-- =========================================
+                | OFERTAS
+                ========================================= -->
+
+    <div class="section-box mt-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="section-title fw-bold text-primary">
+                <i class="bx bx-money me-2"></i>
+                Ofertas
+            </div>
+            <!-- Botón -->
+            <a href="{{ route('ofertas.create', $solicitud) }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>
+                Agregar Oferta
+            </a>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Proveedor</th>
+                        <th>Fecha Oferta</th>
+                        <th class="text-center">
+                            Oferta total
+                        </th>
+                        <th class="text-center">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse($solicitud->ofertas as $oferta)
+                        <tr>
+                            <td>
+                                {{ $oferta->id }}
+                            </td>
+                            <td>
+                                {{ $oferta->proveedor->nombre }}
+                            </td>
+                            <td>
+                                {{ \Carbon\Carbon::parse($oferta->fecha_oferta)->format('d/m/Y') }}
+                            </td>
+                            <td class="text-center">
+                                @php
+                                    $totalOferta = 0;
+                                    foreach ($oferta->detalles as $detalle) {
+                                        if (!$detalle->no_oferto) {
+                                            $totalOferta +=
+                                                $detalle->precio_unitario * $detalle->solicitudItem->cantidad;
+                                        }
+                                    }
+                                @endphp
+                                ${{ number_format($totalOferta, 2) }}
+                            </td>
+
+                            <td class="text-center">
+                                <!-- Editar -->
+                                <a href="{{ route('ofertas.edit', $oferta) }}" class="btn btn-sm btn-info">
+                                    <i class="ri-edit-line"></i>
+                                </a>
+                                <!-- Eliminar -->
+                                <form action="{{ route('ofertas.destroy', $oferta) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm(
+                                            '¿Eliminar esta oferta?'
+                                        )">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">
+                                No hay ofertas registradas.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 
     <!-- Overlay -->
     <div class="drawer-overlay" id="item-drawer-overlay" data-drawer-close="item-drawer">
@@ -251,7 +348,8 @@
                             <label class="form-label">
                                 Unidad de Medida
                             </label>
-                            <input type="text" name="unidad_medida" class="form-control" placeholder="Unidad" required>
+                            <input type="text" name="unidad_medida" class="form-control" placeholder="Unidad"
+                                required>
                         </div>
                         <!-- Código -->
                         <div class="col-md-6 mb-3">

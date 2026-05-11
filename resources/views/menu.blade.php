@@ -371,16 +371,19 @@
                                     <a href="javascript:void(0)">Pages</a>
                                 </li>
 
-                                <li class="slide {{ request()->routeIs('solicitudes.*') ? 'active' : '' }}"">
+                                <li class="slide">
                                     <a href="{{ route('solicitudes.index') }}" id="solicitudOption"
                                         class="side-menu__item">
-                                        <i class="bx bx-file side-menu__icon"></i>
-                                        <span class="side-menu__label">
+                                        
                                             Solicitudes
-                                        </span>
-
+                                        
                                     </a>
-                                    <a href="#" id="proveedorOption" class="side-menu__item">Proveedores</a>
+                                    <a href="{{ route('proveedores.index') }}" id="proveedorOption"
+                                        class="side-menu__item">
+                                        
+                                            Proveedores
+                                        
+                                    </a>
                                     <a href="#" id="ofertaOption" class="side-menu__item">Ofertas</a>
                                     <a href="#" id="evaluacionOption" class="side-menu__item">Evaluaciones</a>
                                     <a href="#" id="reporteOption" class="side-menu__item">Reportes</a>
